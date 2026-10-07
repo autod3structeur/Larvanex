@@ -30,7 +30,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[pdf,dev]"
+          pip install -e ".[dev]"
 
       - name: Run tests
         run: pytest -q
@@ -46,7 +46,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install
-        run: pip install -e ".[pdf]"
+        run: pip install -e ".[pdf,yara]"
 
       - name: Generate samples
         run: python samples/generate_samples.py
@@ -68,3 +68,11 @@ jobs:
           set -e
           echo "exit code: $code"
           test "$code" -eq 2
+
+      - name: Recursive unpack + HTML report
+        run: |
+          larvanex scan --no-network --no-color --decompose --html report.html -r samples/suspicious || true
+          test -s report.html
+
+      - name: YARA rules are listed and load
+        run: larvanex rules

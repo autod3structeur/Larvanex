@@ -24,3 +24,5 @@ htmlcov/
 
 # Local scan output
 *.report.json
+report.html
+quarantine/

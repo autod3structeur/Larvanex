@@ -7,6 +7,7 @@ from .filetype import FileTypeAnalyzer
 from .hashes import HashAnalyzer
 from .pdf import PdfAnalyzer
 from .strings import StringsAnalyzer
+from .yara import YaraAnalyzer
 
 __all__ = [
     "Analyzer",
@@ -20,4 +21,5 @@ __all__ = [
     "HashAnalyzer",
     "PdfAnalyzer",
     "StringsAnalyzer",
+    "YaraAnalyzer",
 ]

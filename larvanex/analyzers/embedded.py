@@ -122,6 +122,7 @@ class EmbeddedFileAnalyzer(Analyzer):
                     message=f"Embedded {name} found at offset 0x{offset:x}",
                     detail="A file hidden inside another file. Extract and inspect it.",
                     offset=offset,
+                    attack=["T1027.009", "T1204.002"],
                 )
             )
         if len(ctx.data) > limit:
@@ -153,6 +154,7 @@ class EmbeddedFileAnalyzer(Analyzer):
                         severity="high",
                         message=f"Archive contains executable member: {member.filename}",
                         detail="Executables/scripts inside a document or archive are a red flag.",
+                        attack=["T1027.009", "T1204.002"],
                     )
                 )
             if member.filename.lower().endswith("vbaproject.bin"):
@@ -162,6 +164,7 @@ class EmbeddedFileAnalyzer(Analyzer):
                         severity="high",
                         message="VBA macro project found in Office document",
                         detail="Macros can run automatically and download malware.",
+                        attack=["T1059.005", "T1204.002"],
                     )
                 )
 
@@ -196,5 +199,6 @@ class EmbeddedFileAnalyzer(Analyzer):
                     message=f"Embedded {name} recovered from a PDF stream",
                     detail="Hidden payload decompressed from inside the PDF.",
                     offset=offset,
+                    attack=["T1027.009"],
                 )
             )

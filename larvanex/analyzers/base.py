@@ -15,6 +15,8 @@ SEVERITY_WEIGHT = {
     "critical": 60,
 }
 
+SEVERITY_RANK = {name: index for index, name in enumerate(reversed(SEVERITIES))}
+
 
 @dataclass
 class Finding:
@@ -25,6 +27,7 @@ class Finding:
     message: str
     detail: str = ""
     offset: int | None = None
+    attack: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.severity not in SEVERITIES:
@@ -40,6 +43,8 @@ class Finding:
             data["detail"] = self.detail
         if self.offset is not None:
             data["offset"] = self.offset
+        if self.attack:
+            data["attack"] = list(self.attack)
         return data
 
 

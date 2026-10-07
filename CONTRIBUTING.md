@@ -11,7 +11,7 @@ git clone https://github.com/autod3structeur/Larvanex.git
 cd Larvanex
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[pdf,dev]"
+pip install -e ".[pdf,yara,dev]"
 ```
 
 ## Running the checks

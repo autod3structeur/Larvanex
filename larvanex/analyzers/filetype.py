@@ -111,6 +111,7 @@ class FileTypeAnalyzer(Analyzer):
                     severity="high",
                     message=f"Double extension detected: {double}",
                     detail="A document-looking name ending in an executable extension is a classic disguise.",
+                    attack=["T1036.007"],
                 )
             )
 
@@ -121,6 +122,7 @@ class FileTypeAnalyzer(Analyzer):
                     severity="medium",
                     message=f"Executable/script extension: .{extension}",
                     detail=f"Files ending in .{extension} are {DANGEROUS_EXTENSIONS[extension]}.",
+                    attack=["T1204.002"],
                 )
             )
 
@@ -143,6 +145,7 @@ class FileTypeAnalyzer(Analyzer):
                     severity=severity,
                     message=f"Extension mismatch: name says .{extension} but content is {detected}",
                     detail="The file is masquerading as another type. Treat it as untrusted.",
+                    attack=["T1036.008"],
                 )
             )
         else:

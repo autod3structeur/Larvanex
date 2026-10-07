@@ -46,6 +46,7 @@ class EntropyAnalyzer(Analyzer):
                     severity="medium",
                     message=f"Very high entropy ({overall:.2f}) across the whole file",
                     detail="Consistent with an encrypted or packed payload, or a compressed archive.",
+                    attack=["T1027.002"],
                 )
             )
 
@@ -59,6 +60,7 @@ class EntropyAnalyzer(Analyzer):
                     severity="medium",
                     message=f"{len(hot)} high-entropy regions found",
                     detail=f"Likely embedded compressed/encrypted blobs at: {sample}",
+                    attack=["T1027.009"],
                 )
             )
         return findings

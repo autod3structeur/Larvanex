@@ -7,18 +7,17 @@ import re
 
 from .base import Analyzer, Finding, FileContext
 
-PDF_KEYWORDS = {
-    b"/JavaScript": ("high", "Embedded JavaScript"),
-    b"/JS": ("high", "JavaScript action"),
-    b"/OpenAction": ("high", "Automatic action when the PDF is opened"),
-    b"/AA": ("medium", "Additional automatic action trigger"),
-    b"/Launch": ("critical", "Launch action - can start an external program"),
-    b"/EmbeddedFile": ("high", "Embedded file attachment"),
-    b"/RichMedia": ("medium", "Rich media / Flash content"),
-    b"/XFA": ("medium", "XFA form (can carry script)"),
-    b"/Encrypt": ("medium", "The PDF is encrypted"),
-    b"/URI": ("low", "Embedded URI / link"),
-    b"/SubmitForm": ("medium", "Form submission action"),
+PDF_KEYWORDS: dict[bytes, tuple[str, str, list[str]]] = {
+    b"/JavaScript": ("high", "Embedded JavaScript", ["T1059.007", "T1204.002"]),
+    b"/OpenAction": ("high", "Automatic action when the PDF is opened", ["T1204.002"]),
+    b"/AA": ("medium", "Additional automatic action trigger", ["T1204.002"]),
+    b"/Launch": ("critical", "Launch action - can start an external program", ["T1204.002"]),
+    b"/EmbeddedFile": ("high", "Embedded file attachment", ["T1027.009"]),
+    b"/RichMedia": ("medium", "Rich media / Flash content", ["T1203"]),
+    b"/XFA": ("medium", "XFA form (can carry script)", ["T1059.007", "T1204.002"]),
+    b"/Encrypt": ("medium", "The PDF is encrypted", ["T1027"]),
+    b"/URI": ("low", "Embedded URI / link", ["T1071.001"]),
+    b"/SubmitForm": ("medium", "Form submission action", ["T1567"]),
 }
 
 HEX_NAME_RE = re.compile(rb"/[0-9A-Fa-f]{2}(?:#[0-9A-Fa-f]{2}){3,}")
@@ -52,6 +51,7 @@ class PdfAnalyzer(Analyzer):
                     message=f"PDF header is not at the start of the file (offset {header_offset})",
                     detail="Junk prepended before %PDF is a common trick to break scanners.",
                     offset=header_offset,
+                    attack=["T1027"],
                 )
             )
 
@@ -63,10 +63,11 @@ class PdfAnalyzer(Analyzer):
                     severity="low",
                     message=f"Multiple %%EOF markers ({eof_count})",
                     detail="Indicates incremental updates; hide-data-in-update is a known technique.",
+                    attack=["T1027"],
                 )
             )
 
-        for keyword, (severity, description) in PDF_KEYWORDS.items():
+        for keyword, (severity, description, attack) in PDF_KEYWORDS.items():
             count = ctx.data.count(keyword)
             if keyword == b"/JS" and count:
                 continue
@@ -76,6 +77,7 @@ class PdfAnalyzer(Analyzer):
                         category=self.name,
                         severity=severity,
                         message=f"{description}: {keyword.decode()} (x{count})",
+                        attack=list(attack),
                     )
                 )
 
@@ -87,6 +89,7 @@ class PdfAnalyzer(Analyzer):
                     severity="high",
                     message=f"JavaScript present ({js_count} reference(s))",
                     detail="JavaScript in a PDF is a leading indicator of exploitation attempts.",
+                    attack=["T1059.007", "T1204.002"],
                 )
             )
 
@@ -98,6 +101,7 @@ class PdfAnalyzer(Analyzer):
                     severity="high",
                     message=f"{len(obfuscated)} hex-obfuscated PDF name(s)",
                     detail="PDF names encoded as #xx sequences are used to evade string scanners.",
+                    attack=["T1027", "T1140"],
                 )
             )
 
@@ -116,6 +120,7 @@ class PdfAnalyzer(Analyzer):
                         severity="medium",
                         message="PDF is encrypted",
                         detail="Encryption hides content from scanners (and sometimes from the user).",
+                        attack=["T1027"],
                     )
                 )
             attachments = getattr(reader, "attachments", {})
@@ -127,6 +132,7 @@ class PdfAnalyzer(Analyzer):
                         severity="high",
                         message=f"{len(attachments)} embedded attachment(s)",
                         detail=f"Attachments: {names}",
+                        attack=["T1027.009"],
                     )
                 )
         except Exception as exc:  # pragma: no cover - defensive

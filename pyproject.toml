@@ -21,7 +21,10 @@ dev = ["pytest>=7.0"]
 larvanex = "larvanex.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/your-username/Larvanex"
+Homepage = "https://github.com/autod3structeur/Larvanex"
+Repository = "https://github.com/autod3structeur/Larvanex"
+Issues = "https://github.com/autod3structeur/Larvanex/issues"
+Changelog = "https://github.com/autod3structeur/Larvanex/releases"
 
 [tool.setuptools.packages.find]
 include = ["larvanex*"]

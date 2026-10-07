@@ -6,13 +6,16 @@ contain trigger *markers* (magic bytes, keywords), never working code."""
 
 from __future__ import annotations
 
+import io
 import os
-import zlib
 import zipfile
+import zlib
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 BENIGN = os.path.join(BASE, "benign")
 SUSPICIOUS = os.path.join(BASE, "suspicious")
+
+FIXED_DATE = (2026, 1, 1, 0, 0, 0)
 
 MINIMAL_PDF = b"""%PDF-1.4
 1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
@@ -32,6 +35,17 @@ def _write(folder: str, name: str, data: bytes) -> str:
     return path
 
 
+def _build_zip(members: list[tuple[str, bytes]]) -> bytes:
+    """Build a ZIP with fixed timestamps so generated samples are reproducible."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name, content in members:
+            info = zipfile.ZipInfo(name, date_time=FIXED_DATE)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, content)
+    return buffer.getvalue()
+
+
 def _pdf_with_javascript() -> bytes:
     return b"""%PDF-1.4
 1 0 obj << /Type /Catalog /OpenAction << /S /JavaScript /JS (app.alert('pwned')) >> >> endobj
@@ -49,13 +63,10 @@ def _pdf_with_embedded_pe() -> bytes:
 
 
 def _zip_with_executable() -> bytes:
-    import io
-
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w") as archive:
-        archive.writestr("invoice.txt", "Please see attached.")
-        archive.writestr("invoice.exe", b"MZ" + b"\x00" * 100)
-    return buffer.getvalue()
+    return _build_zip([
+        ("invoice.txt", b"Please see attached."),
+        ("invoice.exe", b"MZ" + b"\x00" * 100),
+    ])
 
 
 def main() -> None:
@@ -75,13 +86,10 @@ def main() -> None:
 
 
 def _make_benign_zip() -> bytes:
-    import io
-
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w") as archive:
-        archive.writestr("todo.txt", "buy milk\nwalk dog\n")
-        archive.writestr("data.csv", "a,b,c\n1,2,3\n")
-    return buffer.getvalue()
+    return _build_zip([
+        ("todo.txt", b"buy milk\nwalk dog\n"),
+        ("data.csv", b"a,b,c\n1,2,3\n"),
+    ])
 
 
 if __name__ == "__main__":

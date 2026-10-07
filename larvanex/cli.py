@@ -10,6 +10,7 @@ import sys
 from . import __version__
 from . import report, tui
 from .analyzers.yara import RULES_DIR, collect_rule_files
+from .attack_layer import render_layer
 from .html_report import render_html
 from .scanner import ScanResult, build_analyzers, scan_bytes
 from .watch import watch as watch_loop
@@ -69,6 +70,9 @@ def _build_parser() -> argparse.ArgumentParser:
     scan.add_argument("-r", "--recursive", action="store_true", help="Recurse into directories.")
     scan.add_argument("--json", action="store_true", help="Emit a JSON report instead of the terminal UI.")
     scan.add_argument("--html", metavar="PATH", help="Write a self-contained HTML report.")
+    scan.add_argument(
+        "--attack-layer", metavar="PATH", help="Write a MITRE ATT&CK Navigator layer (JSON)."
+    )
     scan.add_argument("-v", "--verbose", action="store_true", help="Show full detail for every file.")
     _add_intel_options(scan)
 
@@ -124,6 +128,14 @@ def _run_scan(args) -> int:
             handle.write(render_html(results))
         if not args.json:
             tui.make_console(args.no_color).print(f"[green]HTML report written to {args.html}[/green]")
+
+    if args.attack_layer:
+        with open(args.attack_layer, "w", encoding="utf-8") as handle:
+            handle.write(render_layer(results))
+        if not args.json:
+            tui.make_console(args.no_color).print(
+                f"[green]ATT&CK Navigator layer written to {args.attack_layer}[/green]"
+            )
 
     if args.json:
         print(report.render_json(results))

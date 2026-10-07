@@ -46,6 +46,7 @@ It never executes what it scans. Everything is static analysis.
 - [Recursive unpacking & quarantine](#recursive-unpacking--quarantine)
 - [Watch mode](#watch-mode)
 - [HTML forensic report](#html-forensic-report)
+- [ATT&CK Navigator layer](#attack-navigator-layer)
 - [Project structure](#project-structure)
 - [Extending Larvanex](#extending-larvanex)
 - [Development](#development)
@@ -64,7 +65,7 @@ It never executes what it scans. Everything is static analysis.
 | **Recursive unpacking** | Extracts every embedded object (carved files, PDF streams, archive members), scans each one, and shows the nesting as a tree. |
 | **Quarantine** | Writes extracted payloads to a folder with their SHA-256, marked `.quarantined` so they can't be run by accident. |
 | **Self-contained HTML report** | One portable `.html` file with risk gauges, severity charts, the ATT&CK matrix and a searchable findings table. No CDN, works offline. |
-| **MITRE ATT&CK mapping** | Every finding is tagged with real technique IDs and rendered against the ATT&CK tactic matrix. |
+| **MITRE ATT&CK mapping** | Every finding is tagged with real technique IDs, rendered against the ATT&CK tactic matrix, and exportable as an ATT&CK Navigator heatmap layer. |
 | **YARA engine** | Bundled rules plus your own `.yar` files, as an extra signature layer. |
 | **Threat-intel mesh** | Aggregates MalwareBazaar and VirusTotal (plus a local blocklist) into a single consensus verdict. |
 | **Watch mode** | Monitor a folder and scan files the moment they land. |
@@ -126,6 +127,12 @@ Scan a directory tree and write an HTML report:
 
 ```bash
 larvanex scan -r samples/suspicious --html report.html
+```
+
+Export an ATT&CK Navigator layer:
+
+```bash
+larvanex scan -r samples/suspicious --attack-layer layer.json
 ```
 
 JSON for scripting or CI:
@@ -244,6 +251,18 @@ The report is a single file with **no external dependencies**: risk gauges, seve
 
 ---
 
+## ATT&CK Navigator layer
+
+```bash
+larvanex scan -r samples/suspicious --attack-layer layer.json
+```
+
+This writes a [MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/) layer. Open the Navigator, upload `layer.json`, and the enterprise matrix is painted as a heatmap: each detected technique is coloured by the highest severity that referenced it and scored by the summed finding weights. Hovering a technique shows which files triggered it.
+
+A ready-to-open example generated from the bundled samples lives at [`examples/attack-layer.json`](examples/attack-layer.json).
+
+---
+
 ## Project structure
 
 ```text
@@ -261,6 +280,7 @@ Larvanex/
 │   ├── intel/             # MalwareBazaar, VirusTotal, blocklist, mesh
 │   ├── rules/larvanex.yar # bundled YARA rules
 │   ├── attack.py          # MITRE ATT&CK registry + matrix
+│   ├── attack_layer.py    # ATT&CK Navigator layer export
 │   ├── decompose.py       # recursive unpacking + quarantine
 │   ├── html_report.py     # self-contained HTML report
 │   ├── tui.py             # rich command-centre rendering
@@ -268,6 +288,7 @@ Larvanex/
 │   ├── scanner.py         # orchestration, scoring, verdict
 │   ├── report.py          # plain-text + JSON output
 │   └── cli.py             # command line interface
+├── examples/attack-layer.json
 ├── samples/generate_samples.py
 ├── tests/
 └── pyproject.toml

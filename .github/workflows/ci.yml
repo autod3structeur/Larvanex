@@ -69,10 +69,12 @@ jobs:
           echo "exit code: $code"
           test "$code" -eq 2
 
-      - name: Recursive unpack + HTML report
+      - name: Recursive unpack + HTML report + ATT&CK layer
         run: |
-          larvanex scan --no-network --no-color --decompose --html report.html -r samples/suspicious || true
+          larvanex scan --no-network --no-color --decompose --html report.html --attack-layer layer.json -r samples/suspicious || true
           test -s report.html
+          test -s layer.json
+          python -c "import json; d=json.load(open('layer.json')); assert d['domain']=='enterprise-attack' and d['techniques']"
 
       - name: YARA rules are listed and load
         run: larvanex rules

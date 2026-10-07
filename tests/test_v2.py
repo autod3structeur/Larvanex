@@ -128,3 +128,25 @@ def test_zip_member_extraction():
     result = scan_bytes("a.zip", buffer.getvalue(), offline_analyzers(), decompose=True)
     names = [a.name for a in result.artifacts]
     assert any("payload.exe" in n for n in names)
+
+
+def test_attack_layer_export():
+    import json
+
+    from larvanex.attack_layer import build_layer, render_layer
+
+    data = b"%PDF-1.4 /OpenAction /JavaScript /JS (app.alert(1)) %%EOF"
+    result = scan_bytes("doc.pdf", data, offline_analyzers())
+    layer = build_layer([result])
+
+    assert layer["domain"] == "enterprise-attack"
+    assert layer["versions"]["layer"] == "4.5"
+    ids = [t["techniqueID"] for t in layer["techniques"]]
+    assert "T1204.002" in ids
+    entry = next(t for t in layer["techniques"] if t["techniqueID"] == "T1204.002")
+    assert entry["enabled"] is True
+    assert entry["score"] > 0
+    assert entry["color"].startswith("#")
+    assert "doc.pdf" in entry["comment"]
+    assert json.loads(render_layer([result]))["techniques"]
+

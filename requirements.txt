@@ -1,0 +1,6 @@
+# Larvanex has no hard dependencies.
+# Optional, for deeper PDF inspection (embedded attachments, encryption):
+pypdf>=4.0
+
+# Optional, for running the tests:
+pytest>=7.0

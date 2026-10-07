@@ -12,6 +12,8 @@ Larvanex was built around one very common attack: an attacker hides a malicious 
 
 It never executes what it scans. Everything is static analysis.
 
+![Larvanex command-centre TUI](examples/larvanex-tui.svg)
+
 ```text
 ╭────────────────────────────────── Larvanex ──────────────────────────────────╮
 │ hidden_payload.pdf                                                           │

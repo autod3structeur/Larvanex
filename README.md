@@ -12,7 +12,7 @@ Larvanex was built around one very common attack: an attacker hides a malicious 
 
 It never executes what it scans. Everything is static analysis.
 
-![Larvanex command-centre TUI](examples/larvanex-tui.svg)
+![Larvanex demo](examples/larvanex-demo.gif)
 
 ```text
 ╭────────────────────────────────── Larvanex ──────────────────────────────────╮
@@ -290,7 +290,7 @@ Larvanex/
 │   ├── scanner.py         # orchestration, scoring, verdict
 │   ├── report.py          # plain-text + JSON output
 │   └── cli.py             # command line interface
-├── examples/attack-layer.json
+├── examples/             # demo GIF/cast, TUI screenshot, ATT&CK layer
 ├── samples/generate_samples.py
 ├── tests/
 └── pyproject.toml
